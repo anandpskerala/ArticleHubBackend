@@ -38,14 +38,14 @@ export class AuthService {
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.env === "production",
-                sameSite: "lax",
+                sameSite: 'none',
                 maxAge: 15 * 60 * 1000
             });
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: config.env === "production",
-                sameSite: "lax",
+                sameSite: 'none',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -89,14 +89,14 @@ export class AuthService {
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.env === "production",
-                sameSite: "lax",
+                sameSite: 'none',
                 maxAge: 15 * 60 * 1000
             });
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: config.env === "production",
-                sameSite: "lax",
+                sameSite: 'none',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -136,7 +136,7 @@ export class AuthService {
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.env === "production",
-                sameSite: "lax",
+                sameSite: 'none',
                 maxAge: 15 * 60 * 1000
             });
 
