@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { HttpStatusCode } from "../types/httpStatusCodes";
 import { config } from "../config";
+import { CustomRequest } from "../types/CustomRequest";
 
-export const protectRoute = (req: Request, res: Response, next: NextFunction): void => {
+export const protectRoute = (req: CustomRequest, res: Response, next: NextFunction): void => {
     const token = req.cookies?.accessToken
 
     if (!token) {
@@ -13,7 +14,7 @@ export const protectRoute = (req: Request, res: Response, next: NextFunction): v
 
     try {
         const decoded = jwt.verify(token, config.jwt) as { userId: string };
-        req.headers['x-user-id'] = decoded.userId;
+        req.userId = decoded.userId;
         next();
     } catch (err) {
         console.error(err)
