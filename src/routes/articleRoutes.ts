@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { ArticleService } from "../services/articleService";
+import { ArticleService } from "../services/implementation/article.service";
 import { ArticleController } from "../controllers/articleController";
 import { protectRoute } from "../middlewares/protectedRoutes";
 import { upload } from "../middlewares/multer";
+import { ArticleRepository } from "../repositories/implementation/article.repository";
 
 const router: Router = Router();
 
-const articleService = new ArticleService();
+const articleService = new ArticleService(new ArticleRepository());
 const articleController = new ArticleController(articleService);
 
 router.post("/article", protectRoute, upload.single('image'), articleController.createArticle);

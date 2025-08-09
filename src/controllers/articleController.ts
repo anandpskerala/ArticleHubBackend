@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { ArticleService } from "../services/articleService";
+import { CustomRequest } from "../types/CustomRequest";
+import { IArticleService } from "../services/interfaces/IArticleService";
 
 export class ArticleController {
-    constructor(private articleService: ArticleService) { }
+    constructor(private articleService: IArticleService) { }
 
     public createArticle = async (req: Request, res: Response): Promise<void> => {
         const result = await this.articleService.createPost(req);
@@ -14,8 +15,8 @@ export class ArticleController {
         res.status(result.status).json({ message: result.message, article: result.article });
     }
 
-    public getArticles = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public getArticles = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const { page = 1, limit = 10, isCreator = 'false' } = req.query;
         const result = await this.articleService.getArticles(userId, Number(page), Number(limit), isCreator === 'true' ? true : false);
         res.status(result.status).json({
@@ -27,36 +28,36 @@ export class ArticleController {
         });
     }
 
-    public deleteArticle = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public deleteArticle = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const articleId = req.params.id;
         const result = await this.articleService.deleteArticle(userId, articleId as string);
         res.status(result.status).json({message: result.message});
     }
 
-    public likeArticle = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public likeArticle = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const articleId = req.params.id;
         const result = await this.articleService.like(userId, articleId as string);
         res.status(result.status).json({message: result.message});
     }
 
-    public unLikeArticle = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public unLikeArticle = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const articleId = req.params.id;
         const result = await this.articleService.unLike(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
     }
 
-    public blockArticle = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public blockArticle = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const articleId = req.params.id;
         const result = await this.articleService.block(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
     }
 
-    public unBlockArticle = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.headers['x-user-id'] as string;
+    public unBlockArticle = async (req: CustomRequest, res: Response): Promise<void> => {
+        const userId = req.userId as string;
         const articleId = req.params.id;
         const result = await this.articleService.unBlock(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
