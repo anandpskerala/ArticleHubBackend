@@ -10,16 +10,16 @@ import { IAuthService } from "../interfaces/IAuthService";
 import { AuthReturn } from "../../types/AuthReturn";
 
 export class AuthService implements IAuthService {
-    constructor(private readonly userRepository: IUserRepository) {}
+    constructor(private readonly _userRepository: IUserRepository) {}
 
     public async registerUser(user: Partial<IUser>, res: Response): Promise<AuthReturn> {
-        const existingUser = await this.userRepository.findByEmailOrPhone(user.email!, user.phone!);
+        const existingUser = await this._userRepository.findByEmailOrPhone(user.email!, user.phone!);
         if (existingUser) {
             return { message: "User already exists", status: HttpStatusCode.BAD_REQUEST };
         }
 
         const hashedPassword = await bcrypt.hash(user.password as string, 10);
-        const newUser = await this.userRepository.createUser({ ...user, password: hashedPassword });
+        const newUser = await this._userRepository.createUser({ ...user, password: hashedPassword });
 
         const refreshToken = await generateRefreshToken(newUser.id);
         const accessToken = await generateAccessToken(newUser.id, newUser.email);
@@ -43,7 +43,7 @@ export class AuthService implements IAuthService {
     }
 
     public async loginUser(emailOrPhone: string, password: string, res: Response): Promise<AuthReturn> {
-        const user = await this.userRepository.findByEmailOrPhone(emailOrPhone, emailOrPhone);
+        const user = await this._userRepository.findByEmailOrPhone(emailOrPhone, emailOrPhone);
         if (!user) {
             return { message: "Invalid credentials", status: HttpStatusCode.FORBIDDEN };
         }
@@ -80,7 +80,7 @@ export class AuthService implements IAuthService {
         }
 
         const decoded = jwt.verify(token, config.jwt) as { userId: string };
-        const user = await this.userRepository.findById(decoded.userId);
+        const user = await this._userRepository.findById(decoded.userId);
 
         if (!user) {
             return { message: "User not found", status: HttpStatusCode.NOT_FOUND };
@@ -102,7 +102,7 @@ export class AuthService implements IAuthService {
             return { message: "Invalid user Id", status: HttpStatusCode.BAD_REQUEST };
         }
 
-        const user = await this.userRepository.findById(userId);
+        const user = await this._userRepository.findById(userId);
         if (!user) {
             return { message: "User not found", status: HttpStatusCode.NOT_FOUND };
         }
@@ -117,7 +117,7 @@ export class AuthService implements IAuthService {
     }
 
     public async changeUserdetails(userData: Partial<IUser & { newPassword: string }>): Promise<AuthReturn> {
-        const user = await this.userRepository.findOne({ email: userData.email });
+        const user = await this._userRepository.findOne({ email: userData.email });
         if (!user) {
             return { message: "User not found", status: HttpStatusCode.NOT_FOUND };
         }
@@ -136,7 +136,7 @@ export class AuthService implements IAuthService {
             user.password = await bcrypt.hash(userData.newPassword as string, 10);
         }
 
-        await this.userRepository.updateUser({ email: userData.email }, user);
+        await this._userRepository.updateUser({ email: userData.email }, user);
         return { message: isPasswordUpdate ? "Password updated" : "Profile updated", status: HttpStatusCode.OK, user };
     }
 }

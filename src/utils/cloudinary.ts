@@ -8,4 +8,14 @@ cloudinary.config({
     secure: true,
 });
 
+export const uploadFile = async (path: string) => {
+    return await cloudinary.uploader.upload(path, {
+        folder: "nexevent/articles",
+    });
+}
+
+export const destroyFile = async (imageId: string) => {
+    return await cloudinary.uploader.destroy(imageId, { type: "authenticated" });
+}
+
 export default cloudinary;
