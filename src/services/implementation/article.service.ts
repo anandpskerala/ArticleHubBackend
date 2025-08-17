@@ -20,6 +20,14 @@ export class ArticleService implements IArticleService {
             let imageUrl: string | undefined;
             let imageId: string | undefined;
 
+            const exists = await this._repository.findWithQuery({title, authorId});
+            if (exists) {
+                return {
+                    message: "There is already an article with same title",
+                    status: HttpStatusCode.BAD_REQUEST
+                }
+            }
+
             if (req.file) {
                 const uploadResult = await uploadFile(req.file.path); // await cloudinary.uploader.upload(req.file.path, {
                 //     folder: "nexevent/articles",
@@ -54,10 +62,18 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async editPost(req: Request): Promise<ArticleReturn> {
+    public async editPost(req: CustomRequest): Promise<ArticleReturn> {
         try {
             const articleId = req.params.id;
+            const authorId = req.userId;
             let { title, content, category, tags } = req.body;
+            const exists = await this._repository.findWithQuery({title, authorId, _id: {$ne: articleId}});
+            if (exists) {
+                return {
+                    message: "There is already an article with same title",
+                    status: HttpStatusCode.BAD_REQUEST
+                }
+            }
 
             const existingArticle = await this._repository.findById(articleId as string);
             if (!existingArticle) {
