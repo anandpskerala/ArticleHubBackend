@@ -1,10 +1,9 @@
 import fs from "fs";
-import { Model, Types } from "mongoose";
+import { Types } from "mongoose";
 import { IArticle } from "../../models/article/IArticle";
-import { ArticleModel } from "../../models/article/model";
 import { Request } from "express";
 import { HttpStatusCode } from "../../types/httpStatusCodes";
-import cloudinary from "../../utils/cloudinary";
+import { destroyFile, uploadFile } from "../../utils/cloudinary";
 import { CustomRequest } from "../../types/CustomRequest";
 import { IArticleRepository } from "../../repositories/interfaces/IArticleRepository";
 import { ArticleReturn, ArticleReturnWithPagination } from "../../types/ArticleReturn";
@@ -21,10 +20,18 @@ export class ArticleService implements IArticleService {
             let imageUrl: string | undefined;
             let imageId: string | undefined;
 
+            const exists = await this._repository.findWithQuery({title, authorId});
+            if (exists) {
+                return {
+                    message: "There is already an article with same title",
+                    status: HttpStatusCode.BAD_REQUEST
+                }
+            }
+
             if (req.file) {
-                const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                    folder: "nexevent/articles",
-                });
+                const uploadResult = await uploadFile(req.file.path); // await cloudinary.uploader.upload(req.file.path, {
+                //     folder: "nexevent/articles",
+                // });
                 imageUrl = uploadResult.secure_url;
                 imageId = uploadResult.public_id;
             }
@@ -55,10 +62,18 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async editPost(req: Request): Promise<ArticleReturn> {
+    public async editPost(req: CustomRequest): Promise<ArticleReturn> {
         try {
             const articleId = req.params.id;
+            const authorId = req.userId;
             let { title, content, category, tags } = req.body;
+            const exists = await this._repository.findWithQuery({title, authorId, _id: {$ne: articleId}});
+            if (exists) {
+                return {
+                    message: "There is already an article with same title",
+                    status: HttpStatusCode.BAD_REQUEST
+                }
+            }
 
             const existingArticle = await this._repository.findById(articleId as string);
             if (!existingArticle) {
@@ -70,12 +85,12 @@ export class ArticleService implements IArticleService {
 
             let updateData: Partial<IArticle> = { title, content, category, tags: JSON.parse(tags) };
             if (req.file) {
-                const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                    folder: "nexevent/articles",
-                });
+                const uploadResult = await uploadFile(req.file.path); //await cloudinary.uploader.upload(req.file.path, {
+                //     folder: "nexevent/articles",
+                // });
 
                 if (existingArticle.imageId) {
-                    await cloudinary.uploader.destroy(existingArticle.imageId, { type: "authenticated" });
+                    await destroyFile(existingArticle.imageId); // await cloudinary.uploader.destroy(existingArticle.imageId, { type: "authenticated" });
                 }
 
                 updateData.image = uploadResult.secure_url;
@@ -130,7 +145,8 @@ export class ArticleService implements IArticleService {
             }
 
             if (exists.imageId) {
-                await cloudinary.uploader.destroy(exists.imageId, { type: "authenticated" });
+                await destroyFile(exists.imageId);
+                // await cloudinary.uploader.destroy(exists.imageId, { type: "authenticated" });
             }
 
             await this._repository.deleteOne({ _id: articleId, authorId: userId });
@@ -144,7 +160,7 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async like(userId: string, articleId: string): Promise<ArticleReturn> {
+    public async likeArticle(userId: string, articleId: string): Promise<ArticleReturn> {
         try {
             const exists = await this._repository.findById(articleId);
             if (!exists) {
@@ -162,7 +178,7 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async unLike(userId: string, articleId: string): Promise<ArticleReturn> {
+    public async unLikeArticle(userId: string, articleId: string): Promise<ArticleReturn> {
         try {
             const exists = await this._repository.findById(articleId);
             if (!exists) {
@@ -180,7 +196,7 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async block(userId: string, articleId: string): Promise<ArticleReturn> {
+    public async blockArticle(userId: string, articleId: string): Promise<ArticleReturn> {
         try {
             const exists = await this._repository.findById(articleId);
             if (!exists) {
@@ -197,7 +213,7 @@ export class ArticleService implements IArticleService {
         }
     }
 
-    public async unBlock(userId: string, articleId: string): Promise<ArticleReturn> {
+    public async unBlockArticle(userId: string, articleId: string): Promise<ArticleReturn> {
         try {
             const exists = await this._repository.findById(articleId);
             if (!exists) {

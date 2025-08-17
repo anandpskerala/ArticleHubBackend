@@ -1,3 +1,4 @@
+import { FilterQuery } from "mongoose";
 import { IArticle } from "../../models/article/IArticle";
 
 export interface IArticleRepository {
@@ -9,4 +10,5 @@ export interface IArticleRepository {
     deleteOne(filter: object): Promise<void>;
     updateById(articleId: string, updateData: Partial<IArticle>): Promise<IArticle | undefined>;
     findWithPagination(filter: object, skip: number, limit: number): Promise<IArticle[]>;
+    findWithQuery(query: FilterQuery<IArticle>): Promise<IArticle | undefined>;
 }

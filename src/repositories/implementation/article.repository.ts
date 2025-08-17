@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import { IArticle } from "../../models/article/IArticle";
 import { BaseRepository } from "../base.repository";
 import { IArticleRepository } from "../interfaces/IArticleRepository";
@@ -22,5 +22,10 @@ export class ArticleRepository extends BaseRepository<IArticle> implements IArti
             .limit(limit)
             .populate("authorId")).map(doc => doc.toJSON() as IArticle);
         return doc;
+    }
+
+    async findWithQuery(query: FilterQuery<IArticle>): Promise<IArticle | undefined> {
+        const doc = await this._model.findOne(query);
+        return doc?.toJSON() as IArticle;
     }
 }

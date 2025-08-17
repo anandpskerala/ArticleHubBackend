@@ -38,28 +38,28 @@ export class ArticleController {
     public likeArticle = async (req: CustomRequest, res: Response): Promise<void> => {
         const userId = req.userId as string;
         const articleId = req.params.id;
-        const result = await this.articleService.like(userId, articleId as string);
+        const result = await this.articleService.likeArticle(userId, articleId as string);
         res.status(result.status).json({message: result.message});
     }
 
     public unLikeArticle = async (req: CustomRequest, res: Response): Promise<void> => {
         const userId = req.userId as string;
         const articleId = req.params.id;
-        const result = await this.articleService.unLike(userId, articleId as string);
+        const result = await this.articleService.unLikeArticle(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
     }
 
     public blockArticle = async (req: CustomRequest, res: Response): Promise<void> => {
         const userId = req.userId as string;
         const articleId = req.params.id;
-        const result = await this.articleService.block(userId, articleId as string);
+        const result = await this.articleService.blockArticle(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
     }
 
     public unBlockArticle = async (req: CustomRequest, res: Response): Promise<void> => {
         const userId = req.userId as string;
         const articleId = req.params.id;
-        const result = await this.articleService.unBlock(userId, articleId as string);
+        const result = await this.articleService.unBlockArticle(userId, articleId as string);
         res.status(result.status).json({message: result.message});   
     }
 }
