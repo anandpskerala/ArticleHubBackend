@@ -136,6 +136,7 @@ export class AuthService implements IAuthService {
             user.password = await bcrypt.hash(userData.newPassword as string, 10);
         }
 
+        
         await this._userRepository.updateUser({ email: userData.email }, user);
         return { message: isPasswordUpdate ? "Password updated" : "Profile updated", status: HttpStatusCode.OK, user };
     }
